@@ -1,0 +1,13 @@
+{
+    "name": "klassnoenazvanie/nalikbot",
+    "description": "NalikBOT",
+    "autoload": {
+        "psr-4": {
+            "Klassnoenazvanie\\": "src/"
+        }
+    },
+    "require": {
+        "vkcom/vk-php-sdk": "^5.101",
+        "vlucas/phpdotenv": "^5.4"
+    }
+}
