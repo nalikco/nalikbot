@@ -6,8 +6,7 @@ if(intval(date('H')) == 00 && intval(date('i')) == 00){
     $dotenv->load();
 
     $vk = new VK\Client\VKApiClient();
-    $access_token = '0515836dd13cdde82e2bb97993ccbbc73cf47d99ee63f1161e3bf0ce5ce2e9f87fba49772d0a031579502';
-    $group_id = 211151815;
+    $access_token = $_ENV['ACCESS_TOKEN'];
 
     $time_to_meet = new Klassnoenazvanie\Helpers\TimeToMeet($_ENV['MEET_DAY']);
     $days_to_meet = $time_to_meet->compute_days_to_meet();
@@ -18,11 +17,39 @@ if(intval(date('H')) == 00 && intval(date('i')) == 00){
         'user_id' => $_ENV['IGOR_ID'],
         'random_id' => rand(5, 2147483647),
         'message' => $meet_message,
+        'keyboard' => '{
+            "one_time":false,
+            "buttons":[
+            [
+                {
+                    "action":{
+                        "type":"text",
+                        "label":"Курсы валют"
+                    },
+                    "color":"secondary"
+                }
+            ]
+            ]
+        }'
     ]);
     
     $vk->messages()->send($access_token, [
         'user_id' => $_ENV['OKSY_ID'],
         'random_id' => rand(5, 2147483647),
         'message' => $meet_message,
+        'keyboard' => '{
+            "one_time":false,
+            "buttons":[
+            [
+                {
+                    "action":{
+                        "type":"text",
+                        "label":"Курсы валют"
+                    },
+                    "color":"secondary"
+                }
+            ]
+            ]
+        }'
     ]);
 }
