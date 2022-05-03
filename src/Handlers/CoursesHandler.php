@@ -18,7 +18,21 @@ class CoursesHandler extends VKCallbackApiHandler {
         $message_id = $this->vk->messages()->send($this->access_token, [
             'user_id' => $from_id,
             'random_id' => $random_id,
-            'message' => 'Получение курса Беларусбанка...',
+            'message' => 'Получение курса...',
+            'keyboard' => '{
+                "one_time":false,
+                "buttons":[
+                [
+                    {
+                        "action":{
+                            "type":"text",
+                            "label":"Курсы валют"
+                        },
+                        "color":"secondary"
+                    }
+                ]
+                ]
+            }'
         ]);
 
         $courses_url = 'https://belarusbank.by/api/kursExchange?city=%D0%9C%D0%B8%D0%BD%D1%81%D0%BA';
@@ -36,13 +50,41 @@ class CoursesHandler extends VKCallbackApiHandler {
             $this->vk->messages()->edit($this->access_token, [
                 'peer_id' => $from_id,
                 'message' => $message,
-                'message_id' => $message_id
+                'message_id' => $message_id,
+                'keyboard' => '{
+                    "one_time":false,
+                    "buttons":[
+                    [
+                        {
+                            "action":{
+                                "type":"text",
+                                "label":"Курсы валют"
+                            },
+                            "color":"secondary"
+                        }
+                    ]
+                    ]
+                }'
             ]);
         } catch (Exception $e) {
             $this->vk->messages()->edit($this->access_token, [
                 'peer_id' => $from_id,
                 'message' => 'Ошибка получения курса. Попробуйте ещё раз.',
-                'message_id' => $message_id
+                'message_id' => $message_id,
+                'keyboard' => '{
+                    "one_time":false,
+                    "buttons":[
+                    [
+                        {
+                            "action":{
+                                "type":"text",
+                                "label":"Курсы валют"
+                            },
+                            "color":"secondary"
+                        }
+                    ]
+                    ]
+                }'
             ]);
         }
     }
