@@ -1,38 +1,25 @@
 <?php
 namespace Klassnoenazvanie\Handlers;
 
-use VK\CallbackApi\VKCallbackApiHandler;
-
-class CoursesHandler extends VKCallbackApiHandler {
+class CoursesHandler {
     private $vk;
     private $access_token;
+    private $entityManager;
 
-    public function __construct($vk, $access_token) {
+    public function __construct($vk, $access_token, $entityManager) {
         $this->vk = $vk;
         $this->access_token = $access_token;
+        $this->entityManager = $entityManager;
     }
 
-    public function getCourses($group_id, $secret, $object, $from_id) {
+    public function getCourses($group_id, $secret, $object, $user) {
         $random_id = rand(5, 2147483647);
 
         $message_id = $this->vk->messages()->send($this->access_token, [
-            'user_id' => $from_id,
+            'user_id' => $user->getVkId(),
             'random_id' => $random_id,
             'message' => 'Получение курса...',
-            'keyboard' => '{
-                "one_time":false,
-                "buttons":[
-                [
-                    {
-                        "action":{
-                            "type":"text",
-                            "label":"Курсы валют"
-                        },
-                        "color":"secondary"
-                    }
-                ]
-                ]
-            }'
+            'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::clear()
         ]);
 
         $courses_url = 'https://belarusbank.by/api/kursExchange?city=%D0%9C%D0%B8%D0%BD%D1%81%D0%BA';
@@ -48,43 +35,17 @@ class CoursesHandler extends VKCallbackApiHandler {
             $message = "💵 USD — ".number_format(floatval($courses->USD_out), 2, '.')." бел. руб.\n💶 EUR — ".number_format(floatval($courses->EUR_out), 2, '.')." бел. руб.";
 
             $this->vk->messages()->edit($this->access_token, [
-                'peer_id' => $from_id,
+                'peer_id' => $user->getVkId(),
                 'message' => $message,
                 'message_id' => $message_id,
-                'keyboard' => '{
-                    "one_time":false,
-                    "buttons":[
-                    [
-                        {
-                            "action":{
-                                "type":"text",
-                                "label":"Курсы валют"
-                            },
-                            "color":"secondary"
-                        }
-                    ]
-                    ]
-                }'
+                'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
             ]);
         } catch (Exception $e) {
             $this->vk->messages()->edit($this->access_token, [
-                'peer_id' => $from_id,
+                'peer_id' => $user->getVkId(),
                 'message' => 'Ошибка получения курса. Попробуйте ещё раз.',
                 'message_id' => $message_id,
-                'keyboard' => '{
-                    "one_time":false,
-                    "buttons":[
-                    [
-                        {
-                            "action":{
-                                "type":"text",
-                                "label":"Курсы валют"
-                            },
-                            "color":"secondary"
-                        }
-                    ]
-                    ]
-                }'
+                'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
             ]);
         }
     }
