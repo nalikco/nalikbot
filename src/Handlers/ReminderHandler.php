@@ -24,7 +24,7 @@ class ReminderHandler {
         $this->vk->messages()->send($this->access_token, [
             'user_id' => $user->getVkId(),
             'random_id' => $random_id,
-            'message' => 'Введите дату в формате гггг-мм-дд ММ:ЧЧ',
+            'message' => "Введите дату и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст",
             'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
         ]);
     }
@@ -52,10 +52,10 @@ class ReminderHandler {
         switch($user->getStep()){
             case 0:
                 $random_id = rand(5, 2147483647);
-                $wrong_date_message = "Некорректная дата\nВведите дату в формате гггг-мм-дд ММ:ЧЧ";
+                $wrong_date_message = "Некорректный формат\nВведите дату и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст";
 
                 $matches = [];
-                preg_match('~^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})$~', $object['message']['text'], $matches);
+                preg_match('~^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\n(.*)$~', $object['message']['text'], $matches);
 
                 if($matches){
                     $year = intval($matches[1]);
@@ -63,6 +63,7 @@ class ReminderHandler {
                     $day = intval($matches[3]);
                     $hour = intval($matches[4]);
                     $minute = intval($matches[5]);
+                    $text = $matches[6];
 
                     if (!checkdate($month, $day, $year)) {
                         $this->vk->messages()->send($this->access_token, [
@@ -82,7 +83,8 @@ class ReminderHandler {
                         ]);
                     }
 
-                    $date = strtotime(sprintf("%'.04d-%'.02d-%'.02d %'.02d:%'.02d", $year, $month, $day, $hour, $minute));
+                    $date_string = sprintf("%'.04d-%'.02d-%'.02d %'.02d:%'.02d", $year, $month, $day, $hour, $minute);
+                    $date = strtotime($date_string);
                     $now = time();
                     $datediff = $now - $date;
 
@@ -95,22 +97,31 @@ class ReminderHandler {
                         ]);
                     }
 
-                    // $user->setStep(1);
+                    $reminder = new \Klassnoenazvanie\Reminder();
+                    $reminder->setDate(new \DateTime($date_string));
+                    $reminder->setText($text);
+                    $reminder->setDone(0);
 
-                    // $this->entityManager->persist($user);
-                    // $this->entityManager->flush();
+                    $user->setApp(0);
+                    $user->setStep(0);
+                    $reminder->setUser($user);
+                    $user->getReminders()->add($reminder);
+
+                    $this->entityManager->persist($reminder);
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
 
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
                         'random_id' => $random_id,
-                        'message' => sprintf("Время напоминания: %'.02d.%'.02d.%'.04d в %'.02d:%'.02d\n\nВведите текст напоминания", $matches[3], $matches[2], $matches[1], $matches[4], $matches[5]),
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
+                        'message' => sprintf("Напоминание успешно создано.\n\nВремя напоминания: %'.02d.%'.02d.%'.04d в %'.02d:%'.02d\nТекст напоминания: %s", $day, $month, $year, $hour, $minute, $text),
+                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
                     ]);
                 } else {
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
                         'random_id' => $random_id,
-                        'message' => 'Введите дату в формате гггг-мм-дд ММ:ЧЧ',
+                        'message' => "Введите дату и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст",
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                     ]);
                 }

@@ -2,6 +2,7 @@
 namespace Klassnoenazvanie;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity
@@ -31,9 +32,23 @@ class User
      */
     private $step;
 
+    /**
+     * @ORM\OneToMany(targetEntity="Klassnoenazvanie\Reminder", mappedBy="user")
+     */
+    private $reminders;
+
+    public function __construct() {
+        $this->reminders = new ArrayCollection();
+    }
+
     public function getId(): int
     {
         return $this->id;
+    }
+
+    public function getReminders(): \Doctrine\ORM\PersistentCollection
+    {
+        return $this->reminders;
     }
 
     public function getVkId(): int

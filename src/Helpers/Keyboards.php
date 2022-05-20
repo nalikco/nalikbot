@@ -13,33 +13,17 @@ class Keyboards {
                         "label":"Курсы валют"
                     },
                     "color":"secondary"
+                },
+                {
+                    "action":{
+                        "type":"text",
+                        "label":"Напоминание"
+                    },
+                    "color":"primary"
                 }
             ]
             ]
         }';
-
-        // With Reminder
-        // return '{
-        //     "one_time":false,
-        //     "buttons":[
-        //     [
-        //         {
-        //             "action":{
-        //                 "type":"text",
-        //                 "label":"Курсы валют"
-        //             },
-        //             "color":"secondary"
-        //         },
-        //         {
-        //             "action":{
-        //                 "type":"text",
-        //                 "label":"Напоминание"
-        //             },
-        //             "color":"primary"
-        //         }
-        //     ]
-        //     ]
-        // }';
     }
 
     public static function getWithCancel() {
