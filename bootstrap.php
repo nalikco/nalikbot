@@ -5,21 +5,21 @@ use Doctrine\ORM\EntityManager;
 
 require_once "vendor/autoload.php";
 
-// Create a simple "default" Doctrine ORM configuration for Annotations
+$dotenv = Dotenv\Dotenv::createMutable(__DIR__);
+$dotenv->load();
+
 $isDevMode = true;
 $proxyDir = null;
 $cache = null;
 $useSimpleAnnotationReader = false;
 $config = Setup::createAnnotationMetadataConfiguration(array(__DIR__."/src"), $isDevMode, $proxyDir, $cache, $useSimpleAnnotationReader);
-// or if you prefer yaml or XML
-// $config = Setup::createXMLMetadataConfiguration(array(__DIR__."/config/xml"), $isDevMode);
-// $config = Setup::createYAMLMetadataConfiguration(array(__DIR__."/config/yaml"), $isDevMode);
 
-// database configuration parameters
 $conn = array(
-    'driver' => 'pdo_sqlite',
-    'path' => __DIR__ . '/db.sqlite',
+    'driver'    => 'pdo_pgsql',
+    'host'      => $_ENV['DB_HOST'],
+    'user'      => $_ENV['DB_USER'],
+    'password'  => $_ENV['DB_PASS'],
+    'dbname'    => $_ENV['DB_NAME'],
 );
 
-// obtaining the entity manager
 $entityManager = EntityManager::create($conn, $config);

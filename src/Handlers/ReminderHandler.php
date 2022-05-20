@@ -24,7 +24,7 @@ class ReminderHandler {
         $this->vk->messages()->send($this->access_token, [
             'user_id' => $user->getVkId(),
             'random_id' => $random_id,
-            'message' => "Введите дату и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст",
+            'message' => "Введите дату, время и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст",
             'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
         ]);
     }
@@ -52,7 +52,7 @@ class ReminderHandler {
         switch($user->getStep()){
             case 0:
                 $random_id = rand(5, 2147483647);
-                $wrong_date_message = "Некорректный формат\nВведите дату и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст";
+                $wrong_date_message = "Некорректный формат\nВведите дату, время и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст";
 
                 $matches = [];
                 preg_match('~^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\n(.*)$~', $object['message']['text'], $matches);
@@ -114,14 +114,14 @@ class ReminderHandler {
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
                         'random_id' => $random_id,
-                        'message' => sprintf("Напоминание успешно создано.\n\nВремя напоминания: %'.02d.%'.02d.%'.04d в %'.02d:%'.02d\nТекст напоминания: %s", $day, $month, $year, $hour, $minute, $text),
+                        'message' => sprintf("Напоминание успешно создано.\n\nДата и время напоминания: %'.02d.%'.02d.%'.04d в %'.02d:%'.02d\nТекст напоминания: %s", $day, $month, $year, $hour, $minute, $text),
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
                     ]);
                 } else {
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
                         'random_id' => $random_id,
-                        'message' => "Введите дату и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст",
+                        'message' => "Введите дату, время и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст",
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                     ]);
                 }

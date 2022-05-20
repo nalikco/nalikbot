@@ -1,9 +1,6 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
 
-$dotenv = Dotenv\Dotenv::createMutable(__DIR__);
-$dotenv->load();
-
 $vk = new VK\Client\VKApiClient();
 $access_token = $_ENV['ACCESS_TOKEN'];
 $group_id = $_ENV['GROUP_ID'];
