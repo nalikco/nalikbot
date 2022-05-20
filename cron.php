@@ -1,13 +1,33 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/bootstrap.php';
+
+$dotenv = Dotenv\Dotenv::createMutable(__DIR__);
+$dotenv->load();
+
+$vk = new VK\Client\VKApiClient();
+$access_token = $_ENV['ACCESS_TOKEN'];
+
+$activeReminders = $entityManager->getRepository('Klassnoenazvanie\Reminder')->findBy(['done' => 0]);
+
+foreach($activeReminders as $reminder) {
+    $now = time();
+    $datediff = $now - $reminder->getDate()->getTimestamp();
+
+    if ($datediff >= 0){
+        $vk->messages()->send($access_token, [
+            'user_id' => $reminder->getUser()->getVkId(),
+            'random_id' => rand(5, 2147483647),
+            'message' => 'Напоминание: '.$reminder->getText(),
+        ]);
+
+        $reminder->setDone(1);
+
+        $entityManager->persist($reminder);
+        $entityManager->flush();
+    }
+}
 
 if(intval(date('H')) == 00 && intval(date('i')) == 00){
-    $dotenv = Dotenv\Dotenv::createMutable(__DIR__);
-    $dotenv->load();
-
-    $vk = new VK\Client\VKApiClient();
-    $access_token = $_ENV['ACCESS_TOKEN'];
-
     $time_to_meet = new Klassnoenazvanie\Helpers\TimeToMeet($_ENV['MEET_DAY']);
     $days_to_meet = $time_to_meet->compute_days_to_meet();
 
