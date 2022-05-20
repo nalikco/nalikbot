@@ -24,7 +24,7 @@ class ReminderHandler {
         $this->vk->messages()->send($this->access_token, [
             'user_id' => $user->getVkId(),
             'random_id' => $random_id,
-            'message' => "⚠️ Введите дату, время и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст",
+            'message' => "⚠️ Введите дату, время и текст напоминания в формате:\n\nДата (дд-мм-гггг ЧЧ:ММ)\nТекст",
             'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
         ]);
     }
@@ -52,15 +52,15 @@ class ReminderHandler {
         switch($user->getStep()){
             case 0:
                 $random_id = rand(5, 2147483647);
-                $wrong_date_message = "⏺ Некорректный формат\nВведите дату, время и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст";
+                $wrong_date_message = "⏺ Некорректный формат\nВведите дату, время и текст напоминания в формате:\n\nДата (дд-мм-гггг ЧЧ:ММ)\nТекст";
 
                 $matches = [];
-                preg_match('~^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})\n(.*)$~', $object['message']['text'], $matches);
+                preg_match('~^(\d{2})-(\d{2})-(\d{4}) (\d{2}):(\d{2})\n(.*)$~', $object['message']['text'], $matches);
 
                 if($matches){
-                    $year = intval($matches[1]);
+                    $year = intval($matches[3]);
                     $month = intval($matches[2]);
-                    $day = intval($matches[3]);
+                    $day = intval($matches[1]);
                     $hour = intval($matches[4]);
                     $minute = intval($matches[5]);
                     $text = $matches[6];
@@ -121,7 +121,7 @@ class ReminderHandler {
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
                         'random_id' => $random_id,
-                        'message' => "⚠️ Введите дату, время и текст напоминания в формате:\n\nДата (гггг-мм-дд ММ:ЧЧ)\nТекст",
+                        'message' => $wrong_date_message,
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                     ]);
                 }
