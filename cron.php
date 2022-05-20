@@ -14,7 +14,7 @@ foreach($activeReminders as $reminder) {
         $vk->messages()->send($access_token, [
             'user_id' => $reminder->getUser()->getVkId(),
             'random_id' => rand(5, 2147483647),
-            'message' => 'Напоминание: '.$reminder->getText(),
+            'message' => '✳️ Напоминание: '.$reminder->getText(),
         ]);
 
         $reminder->setDone(1);
