@@ -44,7 +44,7 @@ class Handler extends VKCallbackApiHandler {
             $this->apps[$userApp]->runStep($group_id, $secret, $object, $user);
         } else {
             if ($object['message']['text'] == 'Курсы валют') $this->coursesHandler->getCourses($group_id, $secret, $object, $user);
-            if ($object['message']['text'] == 'Напоминание') $this->reminderHandler->initiate($group_id, $secret, $object, $user);
+            if ($object['message']['text'] == 'Напоминания') $this->reminderHandler->initiate($group_id, $secret, $object, $user);
         }
     }
 

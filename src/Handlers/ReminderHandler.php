@@ -1,6 +1,8 @@
 <?php
 namespace Klassnoenazvanie\Handlers;
 
+use Klassnoenazvanie\Helpers\TimeToMeet;
+
 class ReminderHandler {
     private $vk;
     private $access_token;
@@ -14,7 +16,7 @@ class ReminderHandler {
 
     public function initiate($group_id, $secret, $object, $user) {
         $user->setApp(1);
-        $user->setStep(0);
+        $user->setStep(1);
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
@@ -24,33 +26,33 @@ class ReminderHandler {
         $this->vk->messages()->send($this->access_token, [
             'user_id' => $user->getVkId(),
             'random_id' => $random_id,
-            'message' => "⚠️ Введите дату, время и текст напоминания в формате:\n\nДата (дд-мм-гггг ЧЧ:ММ)\nТекст",
-            'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
+            'message' => "🔔 Меню напоминаний",
+            'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getReminderMainMenu()
         ]);
     }
 
     public function runStep($group_id, $secret, $object, $user) {
-        if($object['message']['text'] == 'Отмена') {
-            $user->setApp(0);
-            $user->setStep(0);
-
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-
-            $random_id = rand(5, 2147483647);
-
-            $this->vk->messages()->send($this->access_token, [
-                'user_id' => $user->getVkId(),
-                'random_id' => $random_id,
-                'message' => '❎ Создание напоминания отменено',
-                'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
-            ]);
-
-            return;
-        }
-
         switch($user->getStep()){
             case 0:
+                if($object['message']['text'] == 'Отмена') {
+                    $user->setApp(1);
+                    $user->setStep(1);
+        
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
+        
+                    $random_id = rand(5, 2147483647);
+        
+                    $this->vk->messages()->send($this->access_token, [
+                        'user_id' => $user->getVkId(),
+                        'random_id' => $random_id,
+                        'message' => '❎ Создание напоминания отменено',
+                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getReminderMainMenu()
+                    ]);
+        
+                    return;
+                }
+
                 $random_id = rand(5, 2147483647);
                 $wrong_date_message = "⏺ Некорректный формат\nВведите дату, время и текст напоминания в формате:\n\nДата (дд-мм-гггг ЧЧ:ММ)\nТекст";
 
@@ -124,6 +126,107 @@ class ReminderHandler {
                         'message' => $wrong_date_message,
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                     ]);
+                }
+                break;
+            case 1:
+                if ($object['message']['text'] == 'Создать') {
+                    $user->setApp(1);
+                    $user->setStep(0);
+
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
+
+                    $this->vk->messages()->send($this->access_token, [
+                        'user_id' => $user->getVkId(),
+                        'random_id' => rand(5, 2147483647),
+                        'message' => "⚠️ Введите дату, время и текст напоминания в формате:\n\nДата (дд-мм-гггг ЧЧ:ММ)\nТекст",
+                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
+                    ]);
+
+                    return;
+                }
+
+                if ($object['message']['text'] == 'Список активных') {
+                    $user->setApp(0);
+                    $user->setStep(0);
+
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
+
+                    $message = "Список активных напоминаний:\n\n";
+
+                    $activeReminders = $this->entityManager->getRepository('Klassnoenazvanie\Reminder')->findBy(['done' => 0]);
+
+                    foreach($activeReminders as $reminder) {
+                        $now = time();
+                        $datediff = $now - $reminder->getDate()->getTimestamp();
+
+                        if ($datediff < 0){
+                            $today = new \DateTime("today");
+
+                            $match_date = $reminder->getDate();
+
+                            $diff = $today->diff( $match_date );
+                            $diffDays = (integer)$diff->format( "%R%a" );
+
+                            switch( $diffDays ) {
+                                case 0:
+                                    $date = "Сегодня в ".$reminder->getDate()->format("H:i");
+                                    break;
+                                case +1:
+                                    $date = "Завтра в ".$reminder->getDate()->format("H:i");
+                                    break;
+                                default:
+                                    $formatter = new \IntlDateFormatter('ru_RU', \IntlDateFormatter::FULL, \IntlDateFormatter::FULL);
+                                    $formatter->setPattern('dd MMMM YYYY в HH:mm');
+                                    $date = $formatter->format($reminder->getDate());
+                                    break;
+                            }
+
+                            $seconds_to_date = abs($datediff);
+                            $timeToDate = "";
+
+                            $minutes = round($seconds_to_date / 60);
+                            $hours = round($minutes / 60);
+
+                            if ($hours >= 24) {
+                                $days = round($hours / 24);
+
+                                $timeToDate = TimeToMeet::num_word($days, ['день', 'дня', 'дней']).' и '.TimeToMeet::num_word($hours - $days * 24, ['час', 'часа', 'часов']);
+                            } else $timeToDate = TimeToMeet::num_word($hours, ['час', 'часа', 'часов']);
+
+
+                            $message = $message."— ".$date.": ".$reminder->getText()." (через ".$timeToDate.")\n";
+                        }
+                    }
+
+                    $this->vk->messages()->send($this->access_token, [
+                        'user_id' => $user->getVkId(),
+                        'random_id' => rand(5, 2147483647),
+                        'message' => $message,
+                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
+                    ]);
+
+                    return;
+                }
+
+                if($object['message']['text'] == 'Вернуться') {
+                    $user->setApp(0);
+                    $user->setStep(0);
+        
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
+        
+                    $random_id = rand(5, 2147483647);
+        
+                    $this->vk->messages()->send($this->access_token, [
+                        'user_id' => $user->getVkId(),
+                        'random_id' => $random_id,
+                        'message' => '🔄 Возврат к главному меню',
+                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
+                    ]);
+        
+                    return;
                 }
                 break;
         }

@@ -9,7 +9,7 @@ class TimeToMeet {
     }
 
     public function show_days_to_meet($days_to_meet) {
-        if ($days_to_meet < 0) return '💫 '.$this->num_word(abs($days_to_meet), ['день', 'дня', 'дней']);
+        if ($days_to_meet < 0) return '💫 '.TimeToMeet::num_word(abs($days_to_meet), ['день', 'дня', 'дней']);
 
         if ($days_to_meet == 0) return '💫 Сегодня';
         if ($days_to_meet > 0) return '💜 Хороших выходных';
@@ -23,7 +23,7 @@ class TimeToMeet {
         return floor($datediff / (60 * 60 * 24));
     }
 
-    private function num_word($value, $words, $show = true) 
+    public static function num_word($value, $words, $show = true) 
     {
         $num = $value % 100;
         if ($num > 19) { 

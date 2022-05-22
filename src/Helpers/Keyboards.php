@@ -17,7 +17,7 @@ class Keyboards {
                 {
                     "action":{
                         "type":"text",
-                        "label":"Напоминание"
+                        "label":"Напоминания"
                     },
                     "color":"primary"
                 }
@@ -39,6 +39,38 @@ class Keyboards {
                     "color":"secondary"
                 }
             ]
+            ]
+        }';
+    }
+
+    public static function getReminderMainMenu() {
+        return '{
+            "one_time":false,
+            "buttons":[
+                [
+                    {
+                        "action":{
+                            "type":"text",
+                            "label":"Создать"
+                        },
+                        "color":"positive"
+                    },
+                    {
+                        "action":{
+                            "type":"text",
+                            "label":"Список активных"
+                        },
+                        "color":"secondary"
+                    }
+                ], [
+                    {
+                        "action":{
+                            "type":"text",
+                            "label":"Вернуться"
+                        },
+                        "color":"negative"
+                    }
+                ]
             ]
         }';
     }
