@@ -196,7 +196,7 @@ class ReminderHandler {
                             } else $timeToDate = TimeToMeet::num_word($hours, ['час', 'часа', 'часов']);
 
 
-                            $message = $message."— ".$date.": ".$reminder->getText()." (через ".$timeToDate.")\n";
+                            $message = $message."— ".$date.": ".$reminder->getText()."\n(через ".$timeToDate.")\n";
                         }
                     }
 
