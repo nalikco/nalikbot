@@ -61,6 +61,12 @@ class Keyboards {
                             "label":"Список активных"
                         },
                         "color":"secondary"
+                    }, {
+                        "action":{
+                            "type":"text",
+                            "label":"Удалить"
+                        },
+                        "color":"negative"
                     }
                 ], [
                     {
@@ -68,7 +74,7 @@ class Keyboards {
                             "type":"text",
                             "label":"Вернуться"
                         },
-                        "color":"negative"
+                        "color":"secondary"
                     }
                 ]
             ]
