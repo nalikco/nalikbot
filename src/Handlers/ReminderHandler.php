@@ -191,7 +191,7 @@ class ReminderHandler {
 
                             $userInfo = $this->vk->users()->get($this->access_token, ['user_id' => $user->getVkId()])[0];
 
-                            $message = $message."— ".$date.": ".$reminder->getText()."\n@id".$userInfo['id']." (".$userInfo['first_name']."), ID ".$reminder->getId()." (через ".$timeToDate.")\n";
+                            $message = $message."\n— ".$date.":\nТекст: ".$reminder->getText()."\n@id".$userInfo['id']." (".$userInfo['first_name']."), ID ".$reminder->getId()." (через ".$timeToDate.")\n";
                         }
                     }
 
