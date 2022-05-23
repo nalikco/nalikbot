@@ -40,13 +40,11 @@ if(intval(date('H')) == 00 && intval(date('i')) == 00){
         'user_id' => $_ENV['IGOR_ID'],
         'random_id' => rand(5, 2147483647),
         'message' => $meet_message,
-        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
     ]);
     
     $vk->messages()->send($access_token, [
         'user_id' => $_ENV['OKSY_ID'],
         'random_id' => rand(5, 2147483647),
         'message' => $meet_message,
-        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
     ]);
 }
