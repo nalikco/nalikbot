@@ -181,13 +181,16 @@ class ReminderHandler {
                             $timeToDate = "";
 
                             $minutes = round($seconds_to_date / 60);
-                            $hours = round($minutes / 60);
 
-                            if ($hours >= 24) {
-                                $days = round($hours / 24);
+                            if ($minutes >= 60){
+                                $hours = round($minutes / 60);
 
-                                $timeToDate = TimeToMeet::num_word($days, ['день', 'дня', 'дней']);
-                            } else $timeToDate = TimeToMeet::num_word($hours, ['час', 'часа', 'часов']);
+                                if ($hours >= 24) {
+                                    $days = round($hours / 24);
+
+                                    $timeToDate = TimeToMeet::num_word($days, ['день', 'дня', 'дней']);
+                                } else $timeToDate = TimeToMeet::num_word($hours, ['час', 'часа', 'часов']);
+                            } else $timeToDate = TimeToMeet::num_word($minutes, ['минута', 'минуты', 'минут']);
 
                             $userInfo = $this->vk->users()->get($this->access_token, ['user_id' => $user->getVkId()])[0];
 
@@ -272,7 +275,7 @@ class ReminderHandler {
                     'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                 ]);
 
-                $reminder = $this->entityManager->getRepository('Klassnoenazvanie\Reminder')->findOneBy(['id' => $reminder_id, 'user' => $user, 'done' => 0]);
+                $reminder = $this->entityManager->getRepository('Klassnoenazvanie\Reminder')->findOneBy(['id' => $reminder_id, 'done' => 0]);
 
                 if (!$reminder) return $this->vk->messages()->send($this->access_token, [
                     'user_id' => $user->getVkId(),

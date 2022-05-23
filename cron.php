@@ -12,7 +12,13 @@ foreach($activeReminders as $reminder) {
 
     if ($datediff >= 0){
         $vk->messages()->send($access_token, [
-            'user_id' => $reminder->getUser()->getVkId(),
+            'user_id' => $_ENV['IGOR_ID'],
+            'random_id' => rand(5, 2147483647),
+            'message' => '✳️ Напоминание: '.$reminder->getText(),
+        ]);
+
+        $vk->messages()->send($access_token, [
+            'user_id' => $_ENV['OKSY_ID'],
             'random_id' => rand(5, 2147483647),
             'message' => '✳️ Напоминание: '.$reminder->getText(),
         ]);
