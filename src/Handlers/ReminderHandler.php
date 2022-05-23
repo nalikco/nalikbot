@@ -189,8 +189,9 @@ class ReminderHandler {
                                 $timeToDate = TimeToMeet::num_word($days, ['день', 'дня', 'дней']);
                             } else $timeToDate = TimeToMeet::num_word($hours, ['час', 'часа', 'часов']);
 
+                            $userInfo = $this->vk->users()->get($this->access_token, ['user_id' => $user->getVkId()])[0];
 
-                            $message = $message."— ".$date.": ".$reminder->getText()."\nID ".$reminder->getId()." (через ".$timeToDate.")\n";
+                            $message = $message."— ".$date.": ".$reminder->getText()."\n@id".$userInfo['id']." (".$userInfo['first_name']."), ID ".$reminder->getId()." (через ".$timeToDate.")\n";
                         }
                     }
 
