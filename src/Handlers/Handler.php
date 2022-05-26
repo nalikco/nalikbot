@@ -11,6 +11,7 @@ class Handler extends VKCallbackApiHandler {
 
     private $coursesHandler;
     private $reminderHandler;
+    private $statsHandler;
 
     public function __construct($vk, $access_token, $entityManager) {
         $this->vk = $vk;
@@ -19,6 +20,7 @@ class Handler extends VKCallbackApiHandler {
 
         $this->coursesHandler = new CoursesHandler($vk, $access_token, $entityManager);
         $this->reminderHandler = new ReminderHandler($vk, $access_token, $entityManager);
+        $this->statsHandler = new StatsHandler($vk, $access_token, $entityManager);
         
         $this->apps = $this->getApps();
     }
@@ -45,6 +47,7 @@ class Handler extends VKCallbackApiHandler {
         } else {
             if ($object['message']['text'] == 'Курсы валют') $this->coursesHandler->getCourses($group_id, $secret, $object, $user);
             if ($object['message']['text'] == 'Напоминания') $this->reminderHandler->initiate($group_id, $secret, $object, $user);
+            if ($object['message']['text'] == 'Статистика') $this->statsHandler->getStats($group_id, $secret, $object, $user);
         }
     }
 

@@ -6,22 +6,30 @@ class Keyboards {
         return '{
             "one_time":false,
             "buttons":[
-            [
-                {
-                    "action":{
-                        "type":"text",
-                        "label":"Курсы валют"
+                [
+                    {
+                        "action":{
+                            "type":"text",
+                            "label":"Статистика"
+                        },
+                        "color":"secondary"
+                    }
+                ], [
+                    {
+                        "action":{
+                            "type":"text",
+                            "label":"Курсы валют"
+                        },
+                        "color":"secondary"
                     },
-                    "color":"secondary"
-                },
-                {
-                    "action":{
-                        "type":"text",
-                        "label":"Напоминания"
-                    },
-                    "color":"primary"
-                }
-            ]
+                    {
+                        "action":{
+                            "type":"text",
+                            "label":"Напоминания"
+                        },
+                        "color":"primary"
+                    }
+                ]
             ]
         }';
     }

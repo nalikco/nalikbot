@@ -119,6 +119,21 @@ class ReminderHandler {
                         'message' => sprintf("✅ Напоминание успешно создано.\n\nДата и время напоминания: %'.02d.%'.02d.%'.04d в %'.02d:%'.02d\nТекст напоминания: %s", $day, $month, $year, $hour, $minute, $text),
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
                     ]);
+
+                    if ($user->getVkId() == $_ENV['IGOR_ID']) {
+                        $secondUser = $_ENV['OKSY_ID'];
+                        $infoMessage = "@id".$_ENV['IGOR_ID']." (Игорь) создал напоминание";
+                    } else {
+                        $secondUser = $_ENV['IGOR_ID'];
+                        $infoMessage = "@id".$_ENV['OKSY_ID']." (Оксана) создала напоминание";
+                    }
+
+                    $this->vk->messages()->send($this->access_token, [
+                        'user_id' => $secondUser,
+                        'random_id' => $random_id,
+                        'message' => sprintf("%s.\n\nДата и время напоминания: %'.02d.%'.02d.%'.04d в %'.02d:%'.02d\nТекст напоминания: %s", $infoMessage, $day, $month, $year, $hour, $minute, $text),
+                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
+                    ]);
                 } else {
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
