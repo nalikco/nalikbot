@@ -1,9 +1,11 @@
 <?php
 require_once __DIR__ . '/bootstrap.php';
 
+exec("vendor/bin/doctrine orm:schema-tool:update --force --dump-sql");
+
 $vk = new VK\Client\VKApiClient();
-$access_token = $_ENV['ACCESS_TOKEN'];
-$group_id = $_ENV['GROUP_ID'];
+$access_token = getenv('ACCESS_TOKEN');
+$group_id = getenv('GROUP_ID');
 $wait = 25;
 
 $handler = new Klassnoenazvanie\Handlers\Handler($vk, $access_token, $entityManager);

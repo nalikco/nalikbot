@@ -1,0 +1,20 @@
+version: '3.8'
+services:
+  bot:
+    env_file:
+      - .env
+    build: .
+    depends_on:
+      - db
+    volumes: 
+      - ./src:/app/src
+      - ./composer.json:/app/composer.json
+      - ./index.php:/app/index.php
+    command: php index.php
+  db:
+    image: postgres:14.1-alpine
+    restart: always
+    env_file:
+      - .env
+    volumes: 
+      - ./db:/var/lib/postgresql/data

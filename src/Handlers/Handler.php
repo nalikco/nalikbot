@@ -1,38 +1,42 @@
 <?php
 namespace Klassnoenazvanie\Handlers;
 
+use Doctrine\ORM\Exception\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 use VK\CallbackApi\VKCallbackApiHandler;
+use \Klassnoenazvanie\User;
+use Doctrine\ORM\EntityManager;
 
 class Handler extends VKCallbackApiHandler {
-    private $vk;
-    private $access_token;
-    private $entityManager;
-    private $apps;
+    private EntityManager $entityManager;
+    private array $apps;
 
-    private $coursesHandler;
-    private $reminderHandler;
-    private $statsHandler;
+    private CoursesHandler $coursesHandler;
+    private ReminderHandler $reminderHandler;
+    private StatsHandler $statsHandler;
 
-    public function __construct($vk, $access_token, $entityManager) {
-        $this->vk = $vk;
-        $this->access_token = $access_token;
+    public function __construct($vk, $accessToken, $entityManager) {
         $this->entityManager = $entityManager;
 
-        $this->coursesHandler = new CoursesHandler($vk, $access_token, $entityManager);
-        $this->reminderHandler = new ReminderHandler($vk, $access_token, $entityManager);
-        $this->statsHandler = new StatsHandler($vk, $access_token, $entityManager);
+        $this->coursesHandler = new CoursesHandler($vk, $accessToken, $entityManager);
+        $this->reminderHandler = new ReminderHandler($vk, $accessToken, $entityManager);
+        $this->statsHandler = new StatsHandler($vk, $accessToken, $entityManager);
         
         $this->apps = $this->getApps();
     }
 
+    /**
+     * @throws OptimisticLockException
+     * @throws ORMException
+     */
     public function messageNew($group_id, $secret, $object) {
         $from_id = $object['message']['from_id'];
-        if ($from_id != $_ENV['OKSY_ID'] && $from_id != $_ENV['IGOR_ID']) return;
+        if ($from_id != getenv('OKSY_ID') && $from_id != getenv('IGOR_ID')) return;
 
         $user = $this->entityManager->getRepository('Klassnoenazvanie\User')->findOneBy(['vkid' => $from_id]);
 
         if(!$user){
-            $user = new \Klassnoenazvanie\User();
+            $user = new User();
             $user->setVkId($from_id);
             $user->setApp(0);
             $user->setStep(0);
@@ -51,7 +55,8 @@ class Handler extends VKCallbackApiHandler {
         }
     }
 
-    private function getApps() {
+    private function getApps(): array
+    {
         return [
             1 => $this->reminderHandler
         ];

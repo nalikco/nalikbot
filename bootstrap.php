@@ -5,9 +5,6 @@ use Doctrine\ORM\EntityManager;
 
 require_once "vendor/autoload.php";
 
-$dotenv = Dotenv\Dotenv::createMutable(__DIR__);
-$dotenv->load();
-
 $isDevMode = true;
 $proxyDir = null;
 $cache = null;
@@ -16,10 +13,10 @@ $config = Setup::createAnnotationMetadataConfiguration(array(__DIR__."/src"), $i
 
 $conn = array(
     'driver'    => 'pdo_pgsql',
-    'host'      => $_ENV['DB_HOST'],
-    'user'      => $_ENV['DB_USER'],
-    'password'  => $_ENV['DB_PASS'],
-    'dbname'    => $_ENV['DB_NAME'],
+    'host'      => 'db',
+    'user'      => getenv('POSTGRES_USER'),
+    'password'  => getenv('POSTGRES_PASSWORD'),
+    'dbname'    => 'nalikbot',
 );
 
 $entityManager = EntityManager::create($conn, $config);

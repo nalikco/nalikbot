@@ -2,7 +2,7 @@
 require_once __DIR__ . '/bootstrap.php';
 
 $vk = new VK\Client\VKApiClient();
-$access_token = $_ENV['ACCESS_TOKEN'];
+$access_token = getenv('ACCESS_TOKEN');
 
 $activeReminders = $entityManager->getRepository('Klassnoenazvanie\Reminder')->findBy(['done' => 0]);
 
@@ -12,13 +12,13 @@ foreach($activeReminders as $reminder) {
 
     if ($datediff >= 0){
         $vk->messages()->send($access_token, [
-            'user_id' => $_ENV['IGOR_ID'],
+            'user_id' => getenv('IGOR_ID'),
             'random_id' => rand(5, 2147483647),
             'message' => '✳️ Напоминание: '.$reminder->getText(),
         ]);
 
         $vk->messages()->send($access_token, [
-            'user_id' => $_ENV['OKSY_ID'],
+            'user_id' => getenv('OKSY_ID'),
             'random_id' => rand(5, 2147483647),
             'message' => '✳️ Напоминание: '.$reminder->getText(),
         ]);
@@ -31,19 +31,19 @@ foreach($activeReminders as $reminder) {
 }
 
 if(intval(date('H')) == 00 && intval(date('i')) == 00){
-    $time_to_meet = new Klassnoenazvanie\Helpers\TimeToMeet($_ENV['MEET_DAY']);
+    $time_to_meet = new Klassnoenazvanie\Helpers\TimeToMeet();
     $days_to_meet = $time_to_meet->compute_days_to_meet();
 
     $meet_message = $time_to_meet->show_days_to_meet($days_to_meet);
 
     $vk->messages()->send($access_token, [
-        'user_id' => $_ENV['IGOR_ID'],
+        'user_id' => getenv('IGOR_ID'),
         'random_id' => rand(5, 2147483647),
         'message' => $meet_message,
     ]);
     
     $vk->messages()->send($access_token, [
-        'user_id' => $_ENV['OKSY_ID'],
+        'user_id' => getenv('OKSY_ID'),
         'random_id' => rand(5, 2147483647),
         'message' => $meet_message,
     ]);

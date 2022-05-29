@@ -2,7 +2,8 @@
 namespace Klassnoenazvanie\Helpers;
 
 class Keyboards {
-    public static function getMain() {
+    public static function getMain(): string
+    {
         return '{
             "one_time":false,
             "buttons":[
@@ -34,7 +35,8 @@ class Keyboards {
         }';
     }
 
-    public static function getWithCancel() {
+    public static function getWithCancel(): string
+    {
         return '{
             "one_time":false,
             "buttons":[
@@ -51,7 +53,8 @@ class Keyboards {
         }';
     }
 
-    public static function getReminderMainMenu() {
+    public static function getReminderMainMenu(): string
+    {
         return '{
             "one_time":false,
             "buttons":[
@@ -89,7 +92,8 @@ class Keyboards {
         }';
     }
 
-    public static function clear() {
+    public static function clear(): string
+    {
         return '{"buttons":[],"one_time":true}';
     }
 }

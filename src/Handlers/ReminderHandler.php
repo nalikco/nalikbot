@@ -120,12 +120,12 @@ class ReminderHandler {
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
                     ]);
 
-                    if ($user->getVkId() == $_ENV['IGOR_ID']) {
-                        $secondUser = $_ENV['OKSY_ID'];
-                        $infoMessage = "@id".$_ENV['IGOR_ID']." (Игорь) создал напоминание";
+                    if ($user->getVkId() == getenv('IGOR_ID')) {
+                        $secondUser = getenv('OKSY_ID');
+                        $infoMessage = "@id".getenv('IGOR_ID')." (Игорь) создал напоминание";
                     } else {
-                        $secondUser = $_ENV['IGOR_ID'];
-                        $infoMessage = "@id".$_ENV['OKSY_ID']." (Оксана) создала напоминание";
+                        $secondUser = getenv('IGOR_ID');
+                        $infoMessage = "@id".getenv('OKSY_ID')." (Оксана) создала напоминание";
                     }
 
                     $this->vk->messages()->send($this->access_token, [

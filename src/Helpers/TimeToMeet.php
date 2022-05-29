@@ -2,12 +2,6 @@
 namespace Klassnoenazvanie\Helpers;
 
 class TimeToMeet {
-    private $meet_day;
-
-    public function __construct($meet_day) {
-        $this->meet_day = $meet_day;
-    }
-
     public function show_days_to_meet($days_to_meet) {
         if ($days_to_meet < 0) return '💫 '.TimeToMeet::num_word(abs($days_to_meet), ['день', 'дня', 'дней']);
 
