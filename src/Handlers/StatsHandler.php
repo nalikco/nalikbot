@@ -2,6 +2,7 @@
 namespace Klassnoenazvanie\Handlers;
 
 use Klassnoenazvanie\Helpers\TimeToMeet;
+use Klassnoenazvanie\Helpers\Keyboards;
 
 class StatsHandler {
     private $vk;
@@ -14,7 +15,8 @@ class StatsHandler {
         $this->entityManager = $entityManager;
     }
 
-    public function getStats($group_id, $secret, $object, $user) {
+    public function getStats($user): void
+    {
         $startDate = strtotime("2022-03-11");
         $now = time();
         $dateDiff = $now - $startDate;
@@ -28,11 +30,11 @@ class StatsHandler {
         $message = "— Дата старта: 11 марта 2022 (активен ".$daysFromStartPrint.")";
         $message = $message."\n— Создано напоминаний: ".$allRemindersCount." (активно ".$activeRemindersCount.")";
 
-        $message_id = $this->vk->messages()->send($this->access_token, [
+        $this->vk->messages()->send($this->access_token, [
             'user_id' => $user->getVkId(),
             'random_id' => rand(5, 2147483647),
             'message' => $message,
-            'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
+            'keyboard' => Keyboards::getMain()
         ]);
     }
 }   

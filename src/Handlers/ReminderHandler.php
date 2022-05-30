@@ -2,6 +2,7 @@
 namespace Klassnoenazvanie\Handlers;
 
 use Klassnoenazvanie\Helpers\TimeToMeet;
+use Klassnoenazvanie\Helpers\Dates;
 
 class ReminderHandler {
     private $vk;
@@ -21,11 +22,9 @@ class ReminderHandler {
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $random_id = rand(5, 2147483647);
-
         $this->vk->messages()->send($this->access_token, [
             'user_id' => $user->getVkId(),
-            'random_id' => $random_id,
+            'random_id' => rand(5, 2147483647),
             'message' => "🔔 Меню напоминаний",
             'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getReminderMainMenu()
         ]);
@@ -37,23 +36,20 @@ class ReminderHandler {
                 if($object['message']['text'] == 'Отмена') {
                     $user->setApp(1);
                     $user->setStep(1);
-        
+
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
-        
-                    $random_id = rand(5, 2147483647);
-        
+
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
-                        'random_id' => $random_id,
+                        'random_id' => rand(5, 2147483647),
                         'message' => '❎ Создание напоминания отменено',
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getReminderMainMenu()
                     ]);
-        
+
                     return;
                 }
 
-                $random_id = rand(5, 2147483647);
                 $wrong_date_message = "⏺ Некорректный формат\nВведите дату, время и текст напоминания в формате:\n\nДата (дд-мм-гггг ЧЧ:ММ)\nТекст";
 
                 $matches = [];
@@ -70,7 +66,7 @@ class ReminderHandler {
                     if (!checkdate($month, $day, $year)) {
                         $this->vk->messages()->send($this->access_token, [
                             'user_id' => $user->getVkId(),
-                            'random_id' => $random_id,
+                            'random_id' => rand(5, 2147483647),
                             'message' => $wrong_date_message,
                             'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                         ]);
@@ -79,7 +75,7 @@ class ReminderHandler {
                     if($hour > 24 || $hour < 0 || $minute > 60 || $minute < 0) {
                         $this->vk->messages()->send($this->access_token, [
                             'user_id' => $user->getVkId(),
-                            'random_id' => $random_id,
+                            'random_id' => rand(5, 2147483647),
                             'message' => $wrong_date_message,
                             'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                         ]);
@@ -93,7 +89,7 @@ class ReminderHandler {
                     if ($datediff >= 0) {
                         $this->vk->messages()->send($this->access_token, [
                             'user_id' => $user->getVkId(),
-                            'random_id' => $random_id,
+                            'random_id' => rand(5, 2147483647),
                             'message' => $wrong_date_message,
                             'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                         ]);
@@ -115,8 +111,8 @@ class ReminderHandler {
 
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
-                        'random_id' => $random_id,
-                        'message' => sprintf("✅ Напоминание успешно создано.\n\nДата и время напоминания: %'.02d.%'.02d.%'.04d в %'.02d:%'.02d\nТекст напоминания: %s", $day, $month, $year, $hour, $minute, $text),
+                        'random_id' => rand(5, 2147483647),
+                        'message' => sprintf("✅ Напоминание успешно создано.\n\nДата и время напоминания: %s\nТекст напоминания: %s", Dates::formatDate($reminder->getDate()), $text),
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
                     ]);
 
@@ -130,14 +126,14 @@ class ReminderHandler {
 
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $secondUser,
-                        'random_id' => $random_id,
-                        'message' => sprintf("%s.\n\nДата и время напоминания: %'.02d.%'.02d.%'.04d в %'.02d:%'.02d\nТекст напоминания: %s", $infoMessage, $day, $month, $year, $hour, $minute, $text),
+                        'random_id' => rand(5, 2147483647),
+                        'message' => sprintf("%s.\n\nДата и время напоминания: %s\nТекст напоминания: %s", $infoMessage, Dates::formatDate($reminder->getDate()), $text),
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
                     ]);
                 } else {
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
-                        'random_id' => $random_id,
+                        'random_id' => rand(5, 2147483647),
                         'message' => $wrong_date_message,
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                     ]);
@@ -171,45 +167,8 @@ class ReminderHandler {
                         $datediff = $now - $reminder->getDate()->getTimestamp();
 
                         if ($datediff < 0){
-                            $today = new \DateTime("today");
-
-                            $match_date = $reminder->getDate();
-
-                            $diff = $today->diff( $match_date );
-                            $diffDays = (integer)$diff->format( "%R%a" );
-
-                            switch( $diffDays ) {
-                                case 0:
-                                    $date = "Сегодня в ".$reminder->getDate()->format("H:i");
-                                    break;
-                                case +1:
-                                    $date = "Завтра в ".$reminder->getDate()->format("H:i");
-                                    break;
-                                default:
-                                    $formatter = new \IntlDateFormatter('ru_RU', \IntlDateFormatter::FULL, \IntlDateFormatter::FULL);
-                                    $formatter->setPattern('dd MMMM YYYY в HH:mm');
-                                    $date = $formatter->format($reminder->getDate());
-                                    break;
-                            }
-
-                            $seconds_to_date = abs($datediff);
-                            $timeToDate = "";
-
-                            $minutes = round($seconds_to_date / 60);
-
-                            if ($minutes >= 60){
-                                $hours = round($minutes / 60);
-
-                                if ($hours >= 24) {
-                                    $days = round($hours / 24);
-
-                                    $timeToDate = TimeToMeet::num_word($days, ['день', 'дня', 'дней']);
-                                } else $timeToDate = TimeToMeet::num_word($hours, ['час', 'часа', 'часов']);
-                            } else $timeToDate = TimeToMeet::num_word($minutes, ['минута', 'минуты', 'минут']);
-
                             $userInfo = $this->vk->users()->get($this->access_token, ['user_id' => $reminder->getUser()->getVkId()])[0];
-
-                            $message = $message."\n— ".$date.":\nТекст: ".$reminder->getText()."\n@id".$userInfo['id']." (".$userInfo['first_name']."), ID ".$reminder->getId()." (через ".$timeToDate.")\n";
+                            $message = $message."\n— ".Dates::formatDate($reminder->getDate()).":\nТекст: ".$reminder->getText()."\n@id".$userInfo['id']." (".$userInfo['first_name']."), ID ".$reminder->getId()." (через ".Dates::countdown($datediff).")\n";
                         }
                     }
 
@@ -217,8 +176,14 @@ class ReminderHandler {
                         'user_id' => $user->getVkId(),
                         'random_id' => rand(5, 2147483647),
                         'message' => $message,
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getReminderMainMenu()
+                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
                     ]);
+
+                    $user->setApp(0);
+                    $user->setStep(0);
+
+                    $this->entityManager->persist($user);
+                    $this->entityManager->flush();
 
                     return;
                 }
@@ -226,19 +191,17 @@ class ReminderHandler {
                 if($object['message']['text'] == 'Вернуться') {
                     $user->setApp(0);
                     $user->setStep(0);
-        
+
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
-        
-                    $random_id = rand(5, 2147483647);
-        
+
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
-                        'random_id' => $random_id,
+                        'random_id' => rand(5, 2147483647),
                         'message' => '🔄 Возврат к главному меню',
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
                     ]);
-        
+
                     return;
                 }
 
@@ -260,24 +223,20 @@ class ReminderHandler {
                 }
                 break;
             case 2:
-                $random_id = rand(5, 2147483647);
-
                 if($object['message']['text'] == 'Отмена') {
                     $user->setApp(1);
                     $user->setStep(1);
-        
+
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
-        
-                    $random_id = rand(5, 2147483647);
-        
+
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
-                        'random_id' => $random_id,
+                        'random_id' => rand(5, 2147483647),
                         'message' => '❎ Удаление напоминания отменено',
                         'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getReminderMainMenu()
                     ]);
-        
+
                     return;
                 }
 
@@ -285,7 +244,7 @@ class ReminderHandler {
 
                 if ($reminder_id == 0) return $this->vk->messages()->send($this->access_token, [
                     'user_id' => $user->getVkId(),
-                    'random_id' => $random_id,
+                    'random_id' => rand(5, 2147483647),
                     'message' => '❎ Некорректный ID напоминания',
                     'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                 ]);
@@ -294,7 +253,7 @@ class ReminderHandler {
 
                 if (!$reminder) return $this->vk->messages()->send($this->access_token, [
                     'user_id' => $user->getVkId(),
-                    'random_id' => $random_id,
+                    'random_id' => rand(5, 2147483647),
                     'message' => '❎ Напоминания с таким ID не существует',
                     'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
                 ]);
@@ -302,14 +261,14 @@ class ReminderHandler {
                 $reminder->setDone(1);
                 $user->setApp(0);
                 $user->setStep(0);
-    
+
                 $this->entityManager->persist($user);
                 $this->entityManager->persist($reminder);
                 $this->entityManager->flush();
 
                 return $this->vk->messages()->send($this->access_token, [
                     'user_id' => $user->getVkId(),
-                    'random_id' => $random_id,
+                    'random_id' => rand(5, 2147483647),
                     'message' => '🗑 Напоминание успешно удалено',
                     'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
                 ]);
@@ -317,4 +276,4 @@ class ReminderHandler {
                 break;
         }
     }
-}   
+}

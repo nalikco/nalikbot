@@ -51,7 +51,7 @@ class Handler extends VKCallbackApiHandler {
         } else {
             if ($object['message']['text'] == 'Курсы валют') $this->coursesHandler->getCourses($group_id, $secret, $object, $user);
             if ($object['message']['text'] == 'Напоминания') $this->reminderHandler->initiate($group_id, $secret, $object, $user);
-            if ($object['message']['text'] == 'Статистика') $this->statsHandler->getStats($group_id, $secret, $object, $user);
+            if ($object['message']['text'] == 'Статистика') $this->statsHandler->getStats($user);
         }
     }
 

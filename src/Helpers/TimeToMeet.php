@@ -2,22 +2,24 @@
 namespace Klassnoenazvanie\Helpers;
 
 class TimeToMeet {
-    public function show_days_to_meet($days_to_meet) {
+    public function show_days_to_meet($days_to_meet): string
+    {
         if ($days_to_meet < 0) return '💫 '.TimeToMeet::num_word(abs($days_to_meet), ['день', 'дня', 'дней']);
 
         if ($days_to_meet == 0) return '💫 Сегодня';
         if ($days_to_meet > 0) return '💜 Хороших выходных';
     }
 
-    public function compute_days_to_meet() {
+    public function compute_days_to_meet(): float
+    {
         $now = time();
         $your_date = strtotime(getenv('MEET_DAY'));
-        $datediff = $now - $your_date;
+        $dateDiff = $now - $your_date;
 
-        return floor($datediff / (60 * 60 * 24));
+        return floor($dateDiff / (60 * 60 * 24));
     }
 
-    public static function num_word($value, $words, $show = true) 
+    public static function num_word($value, $words, $show = true): string
     {
         $num = $value % 100;
         if ($num > 19) { 
@@ -25,13 +27,11 @@ class TimeToMeet {
         }
         
         $out = ($show) ?  $value . ' ' : '';
-        switch ($num) {
-            case 1:  $out .= $words[0]; break;
-            case 2: 
-            case 3: 
-            case 4:  $out .= $words[1]; break;
-            default: $out .= $words[2]; break;
-        }
+        $out .= match ($num) {
+            1 => $words[0],
+            2, 3, 4 => $words[1],
+            default => $words[2],
+        };
         
         return $out;
     }
