@@ -11,7 +11,7 @@ class TimeToMeet {
 
     public function compute_days_to_meet() {
         $now = time();
-        $your_date = strtotime($_ENV['MEET_DAY']);
+        $your_date = strtotime(getenv('MEET_DAY'));
         $datediff = $now - $your_date;
 
         return floor($datediff / (60 * 60 * 24));

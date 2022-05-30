@@ -6,6 +6,7 @@ services:
     build: .
     depends_on:
       - db
+    container_name: nalikbot
     command: php index.php
   db:
     image: postgres:14.1-alpine

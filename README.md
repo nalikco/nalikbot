@@ -1,6 +1,4 @@
-    docker ps -a
+crontab:
 
-Get NalikBOT Container ID and add to crontab:
-
-    * * * * * docker exec <CONTAINER_ID> php /app/cron.php
+    * * * * * docker exec nalikbot php /app/cron.php
 

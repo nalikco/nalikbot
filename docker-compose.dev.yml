@@ -6,10 +6,12 @@ services:
     build: .
     depends_on:
       - db
+    container_name: nalikbot
     volumes: 
       - ./src:/app/src
       - ./composer.json:/app/composer.json
       - ./index.php:/app/index.php
+      - ./cron.php:/app/cron.php
     command: php index.php
   db:
     image: postgres:14.1-alpine
