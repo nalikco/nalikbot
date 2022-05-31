@@ -28,6 +28,7 @@ class StatsHandler {
         $activeRemindersCount = $this->entityManager->getRepository('Klassnoenazvanie\Reminder')->createQueryBuilder('r')->where('r.done = 0')->select('count(r.id)')->getQuery()->getSingleScalarResult();
 
         $message = "— Дата старта: 11 марта 2022 (активен ".$daysFromStartPrint.")";
+        $message = $message."\n— Текущая версия: 0.13_1 (30 мая 2022)";
         $message = $message."\n— Создано напоминаний: ".$allRemindersCount." (активно ".$activeRemindersCount.")";
 
         $this->vk->messages()->send($this->access_token, [

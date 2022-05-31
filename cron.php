@@ -11,16 +11,18 @@ foreach($activeReminders as $reminder) {
     $datediff = $now - $reminder->getDate()->getTimestamp();
 
     if ($datediff >= 0){
+        $message = '✳️ '.$reminder->getText();
+
         $vk->messages()->send($access_token, [
             'user_id' => getenv('IGOR_ID'),
             'random_id' => rand(5, 2147483647),
-            'message' => '✳️ Напоминание: '.$reminder->getText(),
+            'message' => $message,
         ]);
 
         $vk->messages()->send($access_token, [
             'user_id' => getenv('OKSY_ID'),
             'random_id' => rand(5, 2147483647),
-            'message' => '✳️ Напоминание: '.$reminder->getText(),
+            'message' => $message,
         ]);
 
         $reminder->setDone(1);

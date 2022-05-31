@@ -4,7 +4,7 @@ namespace Klassnoenazvanie\Handlers;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;
 use VK\CallbackApi\VKCallbackApiHandler;
-use \Klassnoenazvanie\User;
+use Klassnoenazvanie\User;
 use Doctrine\ORM\EntityManager;
 
 class Handler extends VKCallbackApiHandler {
@@ -18,7 +18,7 @@ class Handler extends VKCallbackApiHandler {
     public function __construct($vk, $accessToken, $entityManager) {
         $this->entityManager = $entityManager;
 
-        $this->coursesHandler = new CoursesHandler($vk, $accessToken, $entityManager);
+        $this->coursesHandler = new CoursesHandler($vk, $accessToken);
         $this->reminderHandler = new ReminderHandler($vk, $accessToken, $entityManager);
         $this->statsHandler = new StatsHandler($vk, $accessToken, $entityManager);
         
@@ -49,7 +49,7 @@ class Handler extends VKCallbackApiHandler {
         if($userApp != 0) {
             $this->apps[$userApp]->runStep($group_id, $secret, $object, $user);
         } else {
-            if ($object['message']['text'] == 'Курсы валют') $this->coursesHandler->getCourses($group_id, $secret, $object, $user);
+            if ($object['message']['text'] == 'Курсы валют') $this->coursesHandler->getCourses($user);
             if ($object['message']['text'] == 'Напоминания') $this->reminderHandler->initiate($group_id, $secret, $object, $user);
             if ($object['message']['text'] == 'Статистика') $this->statsHandler->getStats($user);
         }
