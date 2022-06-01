@@ -4,6 +4,7 @@ services:
     env_file:
       - .env
     build: .
+    restart: always
     depends_on:
       - db
     container_name: nalikbot
