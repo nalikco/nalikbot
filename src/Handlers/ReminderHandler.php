@@ -1,8 +1,8 @@
 <?php
 namespace Klassnoenazvanie\Handlers;
 
-use Klassnoenazvanie\Helpers\TimeToMeet;
 use Klassnoenazvanie\Helpers\Dates;
+use Klassnoenazvanie\Helpers\Keyboards;
 
 class ReminderHandler {
     private $vk;
@@ -15,39 +15,31 @@ class ReminderHandler {
         $this->entityManager = $entityManager;
     }
 
-    public function initiate($group_id, $secret, $object, $user) {
-        $user->setApp(1);
-        $user->setStep(1);
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        $this->vk->messages()->send($this->access_token, [
-            'user_id' => $user->getVkId(),
-            'random_id' => rand(5, 2147483647),
-            'message' => "🔔 Меню напоминаний",
-            'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getReminderMainMenu()
+    public function initiate($user, int $conversation_message_id) {
+        $this->vk->messages()->edit($this->access_token, [
+            'peer_id' => $user->getVkId(),
+            'message' => 'Меню напоминаний',
+            'conversation_message_id' => $conversation_message_id,
+            'keyboard' => Keyboards::getReminderMainMenu()
         ]);
     }
 
-    public function runStep($group_id, $secret, $object, $user) {
+    public function runStep($object, $user) {
         switch($user->getStep()){
             case 0:
                 if($object['message']['text'] == 'Отмена') {
-                    $user->setApp(1);
-                    $user->setStep(1);
+                    $user->setApp(0);
+                    $user->setStep(0);
 
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
 
-                    $this->vk->messages()->send($this->access_token, [
+                    return $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
                         'random_id' => rand(5, 2147483647),
                         'message' => '❎ Создание напоминания отменено',
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getReminderMainMenu()
+                        'keyboard' => Keyboards::getMain()
                     ]);
-
-                    return;
                 }
 
                 $wrong_date_message = "⏺ Некорректный формат\nВведите дату, время и текст напоминания в формате:\n\nДата (дд-мм-гггг ЧЧ:ММ)\nТекст";
@@ -68,7 +60,7 @@ class ReminderHandler {
                             'user_id' => $user->getVkId(),
                             'random_id' => rand(5, 2147483647),
                             'message' => $wrong_date_message,
-                            'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
+                            'keyboard' => Keyboards::getWithCancel()
                         ]);
                     }
 
@@ -77,7 +69,7 @@ class ReminderHandler {
                             'user_id' => $user->getVkId(),
                             'random_id' => rand(5, 2147483647),
                             'message' => $wrong_date_message,
-                            'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
+                            'keyboard' => Keyboards::getWithCancel()
                         ]);
                     }
 
@@ -91,7 +83,7 @@ class ReminderHandler {
                             'user_id' => $user->getVkId(),
                             'random_id' => rand(5, 2147483647),
                             'message' => $wrong_date_message,
-                            'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
+                            'keyboard' => Keyboards::getWithCancel()
                         ]);
                     }
 
@@ -113,7 +105,7 @@ class ReminderHandler {
                         'user_id' => $user->getVkId(),
                         'random_id' => rand(5, 2147483647),
                         'message' => sprintf("✅ Напоминание успешно создано.\n\nДата и время напоминания: %s\nТекст напоминания: %s", Dates::formatDate($reminder->getDate()), $text),
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
+                        'keyboard' => Keyboards::getMain()
                     ]);
 
                     if ($user->getVkId() == getenv('IGOR_ID')) {
@@ -128,104 +120,20 @@ class ReminderHandler {
                         'user_id' => $secondUser,
                         'random_id' => rand(5, 2147483647),
                         'message' => sprintf("%s.\n\nДата и время напоминания: %s\nТекст напоминания: %s", $infoMessage, Dates::formatDate($reminder->getDate()), $text),
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
                     ]);
                 } else {
                     $this->vk->messages()->send($this->access_token, [
                         'user_id' => $user->getVkId(),
                         'random_id' => rand(5, 2147483647),
                         'message' => $wrong_date_message,
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
+                        'keyboard' => Keyboards::getWithCancel()
                     ]);
-                }
-                break;
-            case 1:
-                if ($object['message']['text'] == 'Создать') {
-                    $user->setApp(1);
-                    $user->setStep(0);
-
-                    $this->entityManager->persist($user);
-                    $this->entityManager->flush();
-
-                    $this->vk->messages()->send($this->access_token, [
-                        'user_id' => $user->getVkId(),
-                        'random_id' => rand(5, 2147483647),
-                        'message' => "⚠️ Введите дату, время и текст напоминания в формате:\n\nДата (дд-мм-гггг ЧЧ:ММ)\nТекст",
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
-                    ]);
-
-                    return;
-                }
-
-                if ($object['message']['text'] == 'Список активных') {
-                    $message = "Список активных напоминаний:\n\n";
-
-                    $activeReminders = $this->entityManager->getRepository('Klassnoenazvanie\Reminder')->findBy(['done' => 0]);
-
-                    foreach($activeReminders as $reminder) {
-                        $now = time();
-                        $datediff = $now - $reminder->getDate()->getTimestamp();
-
-                        if ($datediff < 0){
-                            $userInfo = $this->vk->users()->get($this->access_token, ['user_id' => $reminder->getUser()->getVkId()])[0];
-                            $message = $message."\n— ".Dates::formatDate($reminder->getDate()).":\nТекст: ".$reminder->getText()."\n@id".$userInfo['id']." (".$userInfo['first_name']."), ID ".$reminder->getId()." (через ".Dates::countdown($datediff).")\n";
-                        }
-                    }
-
-                    $this->vk->messages()->send($this->access_token, [
-                        'user_id' => $user->getVkId(),
-                        'random_id' => rand(5, 2147483647),
-                        'message' => $message,
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
-                    ]);
-
-                    $user->setApp(0);
-                    $user->setStep(0);
-
-                    $this->entityManager->persist($user);
-                    $this->entityManager->flush();
-
-                    return;
-                }
-
-                if($object['message']['text'] == 'Вернуться') {
-                    $user->setApp(0);
-                    $user->setStep(0);
-
-                    $this->entityManager->persist($user);
-                    $this->entityManager->flush();
-
-                    $this->vk->messages()->send($this->access_token, [
-                        'user_id' => $user->getVkId(),
-                        'random_id' => rand(5, 2147483647),
-                        'message' => '🔄 Возврат к главному меню',
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
-                    ]);
-
-                    return;
-                }
-
-                if ($object['message']['text'] == 'Удалить') {
-                    $user->setApp(1);
-                    $user->setStep(2);
-
-                    $this->entityManager->persist($user);
-                    $this->entityManager->flush();
-
-                    $this->vk->messages()->send($this->access_token, [
-                        'user_id' => $user->getVkId(),
-                        'random_id' => rand(5, 2147483647),
-                        'message' => "⚠️ Введите ID напоминания",
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
-                    ]);
-
-                    return;
                 }
                 break;
             case 2:
                 if($object['message']['text'] == 'Отмена') {
-                    $user->setApp(1);
-                    $user->setStep(1);
+                    $user->setApp(0);
+                    $user->setStep(0);
 
                     $this->entityManager->persist($user);
                     $this->entityManager->flush();
@@ -234,7 +142,7 @@ class ReminderHandler {
                         'user_id' => $user->getVkId(),
                         'random_id' => rand(5, 2147483647),
                         'message' => '❎ Удаление напоминания отменено',
-                        'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getReminderMainMenu()
+                        'keyboard' => Keyboards::getMain()
                     ]);
 
                     return;
@@ -246,7 +154,7 @@ class ReminderHandler {
                     'user_id' => $user->getVkId(),
                     'random_id' => rand(5, 2147483647),
                     'message' => '❎ Некорректный ID напоминания',
-                    'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
+                    'keyboard' => Keyboards::getWithCancel()
                 ]);
 
                 $reminder = $this->entityManager->getRepository('Klassnoenazvanie\Reminder')->findOneBy(['id' => $reminder_id, 'done' => 0]);
@@ -255,7 +163,7 @@ class ReminderHandler {
                     'user_id' => $user->getVkId(),
                     'random_id' => rand(5, 2147483647),
                     'message' => '❎ Напоминания с таким ID не существует',
-                    'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getWithCancel()
+                    'keyboard' => Keyboards::getWithCancel()
                 ]);
 
                 $reminder->setDone(1);
@@ -270,10 +178,65 @@ class ReminderHandler {
                     'user_id' => $user->getVkId(),
                     'random_id' => rand(5, 2147483647),
                     'message' => '🗑 Напоминание успешно удалено',
-                    'keyboard' => \Klassnoenazvanie\Helpers\Keyboards::getMain()
+                    'keyboard' => Keyboards::getMain()
                 ]);
 
                 break;
         }
+    }
+
+    public function listActive($user, int $conversation_message_id): void
+    {
+        $message = "Список активных напоминаний:\n\n";
+
+        $activeReminders = $this->entityManager->getRepository('Klassnoenazvanie\Reminder')->findBy(['done' => 0]);
+
+        foreach($activeReminders as $reminder) {
+            $now = time();
+            $datediff = $now - $reminder->getDate()->getTimestamp();
+
+            if ($datediff < 0){
+                $userInfo = $this->vk->users()->get($this->access_token, ['user_id' => $reminder->getUser()->getVkId()])[0];
+                $message = $message."\n— ".Dates::formatDate($reminder->getDate()).":\nТекст: ".$reminder->getText()."\n@id".$userInfo['id']." (".$userInfo['first_name']."), ID ".$reminder->getId()." (через ".Dates::countdown($datediff).")\n";
+            }
+        }
+
+        $this->vk->messages()->edit($this->access_token, [
+            'peer_id' => $user->getVkId(),
+            'message' => $message,
+            'conversation_message_id' => $conversation_message_id,
+        ]);
+    }
+
+    public function initiateCreating($user, int $conversation_message_id): void
+    {
+        $user->setApp(1);
+        $user->setStep(0);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $this->vk->messages()->edit($this->access_token, [
+            'peer_id' => $user->getVkId(),
+            'message' => "⚠️ Введите дату, время и текст напоминания в формате:\n\nДата (дд-мм-гггг ЧЧ:ММ)\nТекст",
+            'conversation_message_id' => $conversation_message_id,
+            'keyboard' => Keyboards::getWithCancel()
+        ]);
+    }
+
+    public function initiateDeleting($user, int $conversation_message_id): void
+    {
+        $user->setApp(1);
+        $user->setStep(2);
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        $this->vk->messages()->edit($this->access_token, [
+            'peer_id' => $user->getVkId(),
+            'message' => "⚠️ Введите ID напоминания",
+            'conversation_message_id' => $conversation_message_id,
+            'keyboard' => Keyboards::getWithCancel()
+        ]);
     }
 }

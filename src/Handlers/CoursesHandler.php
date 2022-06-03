@@ -2,7 +2,6 @@
 namespace Klassnoenazvanie\Handlers;
 
 use Exception;
-use Klassnoenazvanie\Helpers\Keyboards;
 use VK\Client\VKApiClient;
 
 class CoursesHandler {
@@ -14,15 +13,12 @@ class CoursesHandler {
         $this->accessToken = $accessToken;
     }
 
-    public function getCourses($user): void
+    public function getCourses($user, int $conversation_message_id): void
     {
-        $random_id = rand(5, 2147483647);
-
-        $message_id = $this->vk->messages()->send($this->accessToken, [
-            'user_id' => $user->getVkId(),
-            'random_id' => $random_id,
+        $this->vk->messages()->edit($this->accessToken, [
+            'peer_id' => $user->getVkId(),
             'message' => 'Получение курса...',
-            'keyboard' => Keyboards::clear()
+            'conversation_message_id' => $conversation_message_id
         ]);
 
         $courses_url = 'https://belarusbank.by/api/kursExchange?city=%D0%9C%D0%B8%D0%BD%D1%81%D0%BA';
@@ -40,15 +36,13 @@ class CoursesHandler {
             $this->vk->messages()->edit($this->accessToken, [
                 'peer_id' => $user->getVkId(),
                 'message' => $message,
-                'message_id' => $message_id,
-                'keyboard' => Keyboards::getMain()
+                'conversation_message_id' => $conversation_message_id
             ]);
         } catch (Exception $e) {
             $this->vk->messages()->edit($this->accessToken, [
                 'peer_id' => $user->getVkId(),
                 'message' => 'Ошибка получения курса. Попробуйте ещё раз.',
-                'message_id' => $message_id,
-                'keyboard' => Keyboards::getMain()
+                'conversation_message_id' => $conversation_message_id
             ]);
         }
     }
