@@ -45,7 +45,7 @@ class Handler extends VKCallbackApiHandler {
 
         $userApp = $user->getApp();
         if($userApp != 0) $this->apps[$userApp]->runStep($object, $user);
-        else $this->vk->messages()->send($this->accessToken, [
+        else if ($object['message']['text'] == 'Меню') $this->vk->messages()->send($this->accessToken, [
             'user_id' => $user->getVkId(),
             'random_id' => rand(5, 2147483647),
             'message' => 'Меню',
