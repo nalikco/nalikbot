@@ -30,6 +30,11 @@ class StatsHandler {
         $message = $message."\n— Текущая версия: 0.14 (3 июня 2022)";
         $message = $message."\n— Создано напоминаний: ".$allRemindersCount." (активно ".$activeRemindersCount.")";
 
+        $timeToMeet = new TimeToMeet();
+        $daysToMeet = $timeToMeet->compute_days_to_meet();
+
+        if ($daysToMeet < 0 || $daysToMeet == 0) $message = $message."\n— Дата следующей встречи: ".$timeToMeet->show_days_to_meet($daysToMeet);
+
         $this->vk->messages()->edit($this->access_token, [
             'peer_id' => $user->getVkId(),
             'message' => $message,
