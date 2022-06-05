@@ -32,7 +32,7 @@ class StatsHandler {
         $activeRemindersCount = $this->entityManager->getRepository('Klassnoenazvanie\Reminder')->createQueryBuilder('r')->where('r.done = 0')->select('count(r.id)')->getQuery()->getSingleScalarResult();
 
         $message = "— Дата старта: 11 марта 2022 (активен ".$daysFromStartPrint.")";
-        $message = $message."\n— Текущая версия: 0.14 (3 июня 2022)";
+        $message = $message."\n— Текущая версия: 0.14_1 (5 июня 2022)";
         $message = $message."\n— Создано напоминаний: ".$allRemindersCount." (активно ".$activeRemindersCount.")";
 
         $timeToMeet = new TimeToMeet();
