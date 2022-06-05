@@ -1,10 +1,12 @@
 <?php
 namespace Klassnoenazvanie\Helpers;
 
+use DateTime;
+
 class Dates {
-    public static function formatDate(\DateTime $match_date): string
+    public static function formatDate(DateTime $match_date, bool $withoutTime = false): string
     {
-        $today = new \DateTime("today");
+        $today = new DateTime("today");
 
         $diff = $today->diff( $match_date );
         $diffDays = (integer)$diff->format("%R%a");
@@ -18,7 +20,8 @@ class Dates {
                 break;
             default:
                 $formatter = new \IntlDateFormatter('ru_RU', \IntlDateFormatter::FULL, \IntlDateFormatter::FULL);
-                $formatter->setPattern('dd MMMM YYYY в HH:mm');
+                if ($withoutTime) $formatter->setPattern('dd MMMM YYYY');
+                else $formatter->setPattern('dd MMMM YYYY в HH:mm');
                 $date = $formatter->format($match_date);
                 break;
         }

@@ -42,7 +42,9 @@ class Keyboards {
                         "label":"Курсы валют"
                     },
                     "color":"secondary"
-                }, {
+                }
+            ], [
+                {
                     "action":{
                         "type":"callback",
                         "payload": "{\"action\": \"get_reminders_menu\"}",
@@ -86,7 +88,8 @@ class Keyboards {
                             "label":"Создать"
                         },
                         "color":"positive"
-                    },
+                    }
+                ], [
                     {
                         "action":{
                             "type":"callback",
@@ -94,7 +97,9 @@ class Keyboards {
                             "label":"Список активных"
                         },
                         "color":"secondary"
-                    }, {
+                    }
+                ], [
+                    {
                         "action":{
                             "type":"callback",
                             "payload": "{\"action\": \"reminder_delete\"}",

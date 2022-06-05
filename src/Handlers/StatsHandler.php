@@ -1,6 +1,8 @@
 <?php
 namespace Klassnoenazvanie\Handlers;
 
+use Exception;
+use Klassnoenazvanie\Helpers\Dates;
 use Klassnoenazvanie\Helpers\TimeToMeet;
 
 class StatsHandler {
@@ -14,6 +16,9 @@ class StatsHandler {
         $this->entityManager = $entityManager;
     }
 
+    /**
+     * @throws Exception
+     */
     public function getStats($user, int $conversation_message_id): void
     {
         $startDate = strtotime("2022-03-11");
@@ -33,7 +38,14 @@ class StatsHandler {
         $timeToMeet = new TimeToMeet();
         $daysToMeet = $timeToMeet->compute_days_to_meet();
 
-        if ($daysToMeet < 0 || $daysToMeet == 0) $message = $message."\n— Дата следующей встречи: ".$timeToMeet->show_days_to_meet($daysToMeet);
+        if ($daysToMeet < 0 || $daysToMeet == 0) {
+
+            $message = $message."\n— До следующей встречи: ".$timeToMeet->show_days_to_meet($daysToMeet);
+            if ($daysToMeet < 0) {
+                $meetDate = new \DateTime(getenv('MEET_DAY'));
+                $message = $message." (".Dates::formatDate($meetDate, true).")";
+            }
+        }
 
         $this->vk->messages()->edit($this->access_token, [
             'peer_id' => $user->getVkId(),
