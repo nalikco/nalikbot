@@ -43,7 +43,7 @@ if(intval(date('H')) == 00 && intval(date('i')) == 00){
         'random_id' => rand(5, 2147483647),
         'message' => $meet_message,
     ]);
-    
+
     $vk->messages()->send($access_token, [
         'user_id' => getenv('OKSY_ID'),
         'random_id' => rand(5, 2147483647),

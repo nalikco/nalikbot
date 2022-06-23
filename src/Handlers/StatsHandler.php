@@ -39,12 +39,7 @@ class StatsHandler {
         $daysToMeet = $timeToMeet->compute_days_to_meet();
 
         if ($daysToMeet < 0 || $daysToMeet == 0) {
-
-            $message = $message."\n— До следующей встречи: ".$timeToMeet->show_days_to_meet($daysToMeet);
-            if ($daysToMeet < 0) {
-                $meetDate = new \DateTime(getenv('MEET_DAY'));
-                $message = $message." (".Dates::formatDate($meetDate, true).")";
-            }
+            $message = $message."\n\n".$timeToMeet->show_days_to_meet($daysToMeet);
         }
 
         $this->vk->messages()->edit($this->access_token, [
@@ -53,4 +48,4 @@ class StatsHandler {
             'conversation_message_id' => $conversation_message_id
         ]);
     }
-}   
+}
