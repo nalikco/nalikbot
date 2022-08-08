@@ -8,7 +8,7 @@ class TimeToMeet {
 
         if ($days_to_meet == 0) return '💫 Сегодня';
         if ($days_to_meet == -1) return '💫 Завтра';
-        if ($days_to_meet > 0) return '💜 Хороших выходных';
+        if ($days_to_meet > 0) return '';
     }
 
     public function compute_days_to_meet(): float

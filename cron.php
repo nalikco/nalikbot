@@ -38,15 +38,17 @@ if(intval(date('H')) == 00 && intval(date('i')) == 00){
 
     $meet_message = $time_to_meet->show_days_to_meet($days_to_meet);
 
-    $vk->messages()->send($access_token, [
-        'user_id' => getenv('IGOR_ID'),
-        'random_id' => rand(5, 2147483647),
-        'message' => $meet_message,
-    ]);
+    if($meet_message != ''){
+        $vk->messages()->send($access_token, [
+            'user_id' => getenv('IGOR_ID'),
+            'random_id' => rand(5, 2147483647),
+            'message' => $meet_message,
+        ]);
 
-    $vk->messages()->send($access_token, [
-        'user_id' => getenv('OKSY_ID'),
-        'random_id' => rand(5, 2147483647),
-        'message' => $meet_message,
-    ]);
+        $vk->messages()->send($access_token, [
+            'user_id' => getenv('OKSY_ID'),
+            'random_id' => rand(5, 2147483647),
+            'message' => $meet_message,
+        ]);
+    }
 }
